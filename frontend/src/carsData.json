@@ -1,0 +1,14 @@
+{
+  "Name": "Volkswagen ID.4 1st",
+  "Make": "Volkswagen",
+  "Range": 500,
+  "Connector":
+  [
+    {
+      "type": "CCS"
+    },
+    {
+      "type": "Type 2 Mennekes"
+    }
+  ]
+}

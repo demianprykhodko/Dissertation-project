@@ -1,0 +1,473 @@
+
+body{
+  width: 100%;
+}
+
+.showError{
+  width: 250px;
+  position: relative;
+  left: 42%;
+  background: orangered;
+  border-radius: 10px;
+  text-align: center;
+  padding: 10px;
+  margin-bottom: 15px;
+  color: white;
+  font-weight: 800;
+}
+
+#map{
+  width: 720px;
+  height: 700px;
+}
+.location-section{
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.location-range{
+  margin-top: 30px;
+}
+
+.location-range label{
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 14px;
+  position: relative;
+  left: 10px;
+  top: 2px;
+}
+
+.location-range span{
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 14px;
+  position: relative;
+  right: 20px;
+  top: 2px;
+}
+
+.location-button{
+  margin-top: 30px;
+}
+
+.route-section{
+  margin-top: 30px;
+  justify-content: center;
+}
+.location-feature{
+  margin-right: 50px;
+  display: inline-block;
+}
+.route-feature{
+  margin-left: 50px;
+  display: inline-block;
+}
+.option-section{
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+}
+.button_slide {
+  color: black;
+  border: 2px solid rgb(216, 2, 134);
+  border-radius: 0px;
+  padding: 18px 36px;
+  display: inline-block;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 0 #D80286;
+  -webkit-transition: ease-out 0.4s;
+  -moz-transition: ease-out 0.4s;
+  transition: ease-out 0.4s;
+}
+.slide_down:hover {
+  box-shadow: inset 0 100px 0 0 #D80286;
+}
+.title{
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-size: 15px;
+}
+h1 {
+  color: #111;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bold;
+  letter-spacing: -1px;
+  line-height: 1;
+  text-align: center;
+}
+
+.input{
+  display: flex;
+  flex-direction: row;
+  flex-flow: wrap;
+  justify-content: center;
+}
+
+.input-row-1{
+  position:relative;
+	margin-bottom:25px;
+}
+
+.input-row-1 input{
+  width: 250px;
+  margin: 30px 50px 0 50px;
+  border:0;
+  border-bottom:1px solid #555;
+  background:transparent;
+  padding:8px 0 5px 0;
+  font-size: 16px;
+  color: black;
+  font-family: "Lucida Console", Monaco, monospace;
+}
+
+.input-row-1 input:focus{
+  border:none;
+  outline:none;
+  border-bottom:1px solid  #D80286;
+}
+
+.input-row-2{
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.input-row-2 select{
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 12px;
+  margin: 40px 30px 40px 0;
+  width: 200px;
+  border: 0;
+  border-bottom:1px solid #555;
+}
+
+.input-row-2 select:focus{
+  border:none;
+  outline:none;
+  border-bottom:1px solid  #D80286;
+}
+
+.input-row-2 input{
+  margin: 35px 30px 40px 0;
+  text-align: center;
+  width: 200px;
+  border:0;
+  border-bottom:1px solid #555;
+  background:transparent;
+  padding:8px 0 5px 0;
+  color: black;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 14px;
+}
+
+.input-row-2 input:focus{
+  border:none;
+  outline:none;
+  border-bottom:1px solid  #D80286;
+}
+
+.input-row-4{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-basis: 100%;
+}
+
+.input-row-4 button{
+  margin: 30px 50px 0 30px;
+}
+
+.input-row-3{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.input-row-3 span{
+  position: relative;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 12px;
+  bottom: 5px;
+  left: 50px;
+}
+
+.input-row-3 label{
+  margin-top: -10px;
+  position: relative;
+  top: 4px;
+  left: 170px;
+}
+
+.input-row-3 input{
+  margin: 0 30px 0 30px;
+}
+
+.range{
+  -webkit-appearance: none;
+  background-color: #bdc3c7;
+  width: 100px;
+  height: 5px;
+  border-radius: 5px;
+  margin: 0 auto;
+  outline: 0;
+}
+
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background-color: #e74c3c;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
+  transition: .3s ease-in-out;
+}
+
+.range::-webkit-slider-thumb:hover{
+  background-color: white;
+  border: 2px solid #e74c3c;
+}
+
+.submit-button{
+  margin-left: 60px;
+}
+
+.info{
+  display: flex;
+  flex-direction: row;
+  margin-top: 50px;
+}
+
+.left-info{
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px 0 10px;
+  width: 25%;
+}
+
+.output-from{
+  display: flex;
+  flex-direction: row;
+  height: 20px;
+  padding: 25px 0 25px 0;
+  margin-bottom: 5px;
+  max-height: 50px;
+  background: transparent;
+  border: 2px solid #D80286;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 16px;
+}
+
+.output-from i{
+  position: relative;
+  left: 27px;
+  top: -7px;
+}
+
+.output-from-text{
+  margin-left: 80px;
+}
+
+.output-to{
+  display: flex;
+  flex-direction: row;
+  height: 20px;
+  padding: 25px 0 25px 0;
+  max-height: 50px;
+  background: transparent;
+  border: 2px solid #D80286;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 16px;
+}
+
+.output-to i{
+  position: relative;
+  left: 27px;
+  top: -7px;
+}
+
+.output-to-text{
+  margin-left: 80px;
+}
+
+.output-name{
+  display: flex;
+  flex-direction: row;
+  height: 20px;
+  padding: 25px 0 25px 0;
+  max-height: 50px;
+  background: transparent;
+  border: 2px solid #D80286;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.output-name i{
+  position: relative;
+  left: 27px;
+  top: -7px;
+}
+
+.output-name-text{
+  margin-left: 80px;
+}
+
+.output-name-icon{
+  margin-top: 7px;
+}
+
+.charger-counter{
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.coords{
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.flags{
+  text-align: center;
+}
+
+.queue-title{
+  margin-top: 50px;
+  text-align: center;
+  font-size: 23px;
+  text-decoration: underline;
+}
+
+.queue-empty-list{
+  text-align: center;
+  margin-top: 100px;
+}
+
+.queue-entity{
+  height: 100px;
+  background: lightgray;
+  margin-top: 15px;
+  border-radius: 10px;
+  text-align: center;
+  padding: 20px 0 0 0;
+}
+
+.queue-section{
+  padding: 10px;
+  margin: 0 5px;
+  border: 2px solid #D80286;
+  flex-grow: 100;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 16px;
+}
+
+.queue-item{
+  margin-top: 10px;
+}
+
+.list-start{
+  margin-top: 10px;
+}
+
+.arrived-button{
+  margin-top: 30px;
+  background: transparent;
+  border: 1px solid #e74c3c;
+  display: inline-block;
+  margin-left: 100px;
+  border-radius: 10px;
+  width: 100px;
+  text-align: center;
+}
+
+.arrived-button button{
+  background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}
+
+.next-button{
+  margin-top: 30px;
+  background: transparent;
+  border: 1px solid #e74c3c;
+  display: inline-block;
+  margin-left: 70px;
+  border-radius: 10px;
+  width: 100px;
+  text-align: center;
+}
+
+.next-button button{
+  background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}
+
+.google-button{
+  margin-top: 50px;
+  margin-left: 75px;
+}
+
+.google-button a{
+  text-decoration: none;
+  color: darkred;
+  font-size: 25px;
+}
+
+.leave-button{
+  margin-top: 30px;
+  background: transparent;
+  border: 1px solid #e74c3c;
+  display: inline-block;
+  margin-left: 100px;
+  border-radius: 10px;
+  width: 100px;
+  text-align: center;
+}
+
+.leave-button button{
+  background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}
+
+.right-info{
+  padding: 22px;
+  border: 2px solid red;
+  flex-grow: 100;
+  margin: 5px;
+}
+
+.info-item{
+  margin-top: 10px;
+  text-align: center;
+}
+
+.list-time{
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 10px;
+}
+
+.list-reserved{
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}

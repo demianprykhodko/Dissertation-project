@@ -1,0 +1,224 @@
+<head>
+  <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<div class="title">
+  <h1>A Route Planner for Electric Vehicles</h1>
+</div>
+<div class="showError" *ngIf="showError">
+  You spen too much using the charger
+</div>
+<div class="option-section">
+  <div class="location-feature">
+    <button class="button_slide slide_down button1" (click)="showLocationSection()">Location Finder</button>
+  </div>
+  <div class="route-feature">
+    <button class="button_slide slide_down button2" (click)="showRouteSection()">Route Finder</button>
+  </div>
+</div>
+<div *ngIf="locationSection" class="location-section">
+  <div class="input-row-2">
+    <select [(ngModel)]="carMake" (change)="showCarMake()">
+      <option value="">Select your car producer</option>
+      <option *ngFor="let car of cars">{{car.Make}}</option>
+    </select>
+    <select [(ngModel)]="carModelSelect" (change)="showCar()" *ngIf="carMake">
+      <option value="">Select your car model</option>
+      <option *ngFor="let carmodel of carModel">{{carmodel.Name}}</option>
+    </select>
+    <div *ngFor="let car of selectedCar">
+      <input *ngIf="selectedCar" type="text" value="{{car.Range}}">
+    </div>
+  </div>
+  <div class="location-range">
+    <span>Radius of search</span>
+    <input class="range" type="range" min="1000" max="10000" step="500" [(ngModel)]="locationRange" style="padding: 0;">
+    <label>{{locationRange}}m</label>
+  </div>
+  <div class="location-range">
+    <span>Time for charge</span>
+    <input class="range" type="range" min="1800" max="7200" step="600" [(ngModel)]="timeToStay" style="padding: 0;">
+    <label>{{timeToStay}} in seconds</label>
+  </div>
+  <div class="location-button">
+    <button id="location" class="button_slide slide_down" (click)="getLocation()">Get Location</button>
+  </div>
+</div>
+<div [hidden]="!routeSection" class="route-section">
+  <div class="input">
+    <div class="input-row-1">
+      <input type="text" id="input1" class="origin-dest" [(ngModel)]="fromLocation" placeholder="Origin"/>
+      <input type="text" id="input2" class="origin-dest" [(ngModel)]="toLocation" placeholder="Destination"/>
+    </div>
+    <div class="input-row-2">
+      <select [(ngModel)]="carMake" (change)="showCarMake()">
+        <option value="">Select your car producer</option>
+        <option *ngFor="let car of cars">{{car.Make}}</option>
+      </select>
+      <select [(ngModel)]="carModelSelect" (change)="showCar()" *ngIf="carMake">
+        <option value="">Select your car model</option>
+        <option *ngFor="let carmodel of carModel">{{carmodel.Name}}</option>
+      </select>
+      <div *ngFor="let car of selectedCar">
+        <input *ngIf="selectedCar" type="text" value="{{car.Range}}">
+      </div>
+    </div>
+    <div class="input-row-3">
+      <span>Charge at start</span>
+      <label for="start">{{chargeAtStart}}%</label>
+      <input class="range" type="range" min="{{chargeAtStop}}" max="100" step="1" [(ngModel)]="chargeAtStart" style="padding: 0;">
+      <span>Charge at stop</span>
+      <label for="stop">{{chargeAtStop}}%</label>
+      <input class="range" type="range" min="10" max="80" step="1" [(ngModel)]="chargeAtStop" style="padding: 0;">
+    </div>
+    <div *ngIf="selectedCar" class="input-row-4 submit-button">
+      <button id="optimalFast" class="button_slide slide_down" (click)="getOptimalRouteFast()">Optimal Fast</button>
+      <button id="optimalCustom" class="button_slide slide_down" (click)="getOptimalRouteCustom()">Optimal Custom</button>
+      <button id="all" class="button_slide slide_down" (click)="getAllOnRoute()">Show All</button>
+    </div>
+  </div>
+</div>
+<div class="info">
+  <div class="left-info">
+    <div *ngIf="fromLocation" class="output-from">
+      <div class="output-from-icon">
+        <i class="fa fa-map-marker fa-2x" aria-hidden="true"></i>
+      </div>
+      <div class="output-from-text">
+        {{fromLocation}}
+      </div>
+    </div>
+    <div class="output-name" *ngFor="let charger of calculatedChargers">
+      <div class="output-name-icon">
+        <i class="fa fa-stop fa-1x" aria-hidden="true"></i>
+      </div>
+      <div class="output-name-text">
+        {{charger.ChargeDeviceName}}
+      </div>
+    </div>
+    <div *ngIf="toLocation" class="output-to">
+      <div class="output-to-icon">
+        <i class="fa fa-flag-checkered fa-2x" aria-hidden="true"></i>
+      </div>
+      <div class="output-to-text">
+        {{toLocation}}
+      </div>
+    </div>
+    <div *ngIf="done == 1" class="google-button">
+      <a [attr.href]="link">Start to drive</a>.
+    </div>
+  </div>
+  <div class="map-section">
+    <div #map id="map"></div>
+  </div>
+  <div *ngIf="infoSection" class="right-info">
+      <div class="info-item">Name of Charger: {{chargerChosen.ChargeDeviceName}}</div>
+      <div class="coords info-item">
+        <span>Coordinates: </span>
+        <div>{{chargerChosen.ChargeDeviceLatitude}}</div>
+        <div>{{chargerChosen.ChargeDeviceLongitude}}</div>
+      </div>
+      <div class="charger-counter info-item">
+        <div *ngIf="mennekes>0">
+          Type 2 x{{mennekes}}
+        </div>
+        <div *ngIf="ccs>0">
+          CCS x{{ccs}}
+        </div>
+        <div *ngIf="jevs>0">
+          CHAdeMO x{{jevs}}
+        </div>
+      </div>
+      <div class="info-item flags" *ngIf="chargerChosen.Accessible24Hours">
+        Accessible 24 hours
+      </div>
+      <div class="info-item flags" *ngIf="chargerChosen.ParkingFeesFlag">
+          Parking fees are present
+      </div>
+      <div class="info-item flags" *ngIf="!chargerChosen.Accessible24Hours">
+        Is not accessible 24 hours
+      </div>
+      <div class="info-item flags" *ngIf="!chargerChosen.ParkingFeesFlag">
+          There are no parking fees
+      </div>
+      <div class="next-button">
+        <button (click)="getNextOptimalRouteCustom()">Next</button>
+      </div>
+  </div>
+  <div class="queue-section" *ngIf="queueSection == true">
+    <div class="charger-info">
+      <div class="queue-item">Name of Charger: {{chargerChosen.ChargeDeviceName}}</div>
+      <div class="coords queue-item">
+        <span>Coordinates: </span>
+        <div>{{chargerChosen.ChargeDeviceLatitude}}</div>
+        <div>{{chargerChosen.ChargeDeviceLongitude}}</div>
+      </div>
+      <div class="charger-counter queue-item">
+        <div *ngIf="mennekes>0">
+          Type 2 x{{mennekes}}
+        </div>
+        <div *ngIf="ccs>0">
+          CCS x{{ccs}}
+        </div>
+        <div *ngIf="jevs>0">
+          CHAdeMO x{{jevs}}
+        </div>
+      </div>
+      <div class="queue-item flags" *ngIf="chargerChosen.Accessible24Hours">
+        Accessible 24 hours
+      </div>
+      <div class="queue-item flags" *ngIf="chargerChosen.ParkingFeesFlag">
+          Parking fees are present
+      </div>
+      <div class="queue-item flags" *ngIf="!chargerChosen.Accessible24Hours">
+        Is not accessible 24 hours
+      </div>
+      <div class="queue-item flags" *ngIf="!chargerChosen.ParkingFeesFlag">
+          There are no parking fees
+      </div>
+    </div>
+    <div class="queue">
+      <div class="queue-title">
+        Queue
+      </div>
+      <div *ngIf="ourQueue" class="queue-list">
+        <div *ngFor="let queue1 of ourQueue.entity" class="queue-entity">
+          <div class="list-car">
+            {{queue1.car}}
+          </div>
+          <div class="list-time">
+            <div class="list-time-hours">
+              {{queue1.time.hours}} hours
+            </div>
+            <div class="list-time-minutes">
+              {{queue1.time.minutes}} minutes
+            </div>
+          </div>
+          <div class="list-reserved" *ngIf="queue1.reserved == true">
+            <div class="list-reserved-text">
+              Reserved
+            </div>
+            <div class="list-reserved-time">
+              {{this.timeLeft}} seconds
+            </div>
+          </div>
+          <div *ngIf="queue1.reserved==false" class="list-start">
+            You have {{time}} seconds to charge your car
+          </div>
+        </div>
+        <div *ngIf="ourQueue.entity[0].reserved == true" class="arrived-button">
+          <button (click)="startCharging()">
+            Arrived
+          </button>
+        </div>
+        <div *ngIf="ourQueue.entity[0] == ourEntity && ourQueue.entity[0].reserved == false" class="leave-button">
+          <button (click)="leaveCharger()">
+            Charged up
+          </button>
+        </div>
+      </div>
+      <div *ngIf="!ourQueue" class="queue-empty-list">
+        <button (click)="addToQueue()">Reserve a slot</button>
+      </div>
+    </div>
+  </div>
+</div>
