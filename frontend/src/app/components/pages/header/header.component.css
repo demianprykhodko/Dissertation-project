@@ -1,0 +1,40 @@
+h2 {
+  color: black;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bold;
+  letter-spacing: -1px;
+  line-height: 1;
+  text-align: center;
+}
+
+.header{
+  width: 100%;
+  height: 60px;
+  background-color: #e6e6e6;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.header__links{
+  margin-left: auto;
+  margin-right: 30px;
+}
+
+.header__links__button{
+  all: unset;
+}
+
+.header__links__button:hover{
+  text-decoration: underline;
+  text-align: center;
+  border-radius: 5px;
+  background-color: white;
+  width: 120px;
+  height: 30px;
+}
+
+.header__title{
+  margin-left: 33%;
+}

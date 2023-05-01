@@ -15,7 +15,7 @@ type: Number,
 },
 Connector: [{
 Type: {
-    type: String,
+type: String,
 }
 }],
 }, {_id: false});

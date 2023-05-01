@@ -11,5 +11,7 @@ export class place{
   time!: Time;
   place!: number;
   reserved!: boolean;
-  localId!: Number;
+  localId?: Number;
+  reserveEnd?: Date;
+  timeEnd?: Date;
 }

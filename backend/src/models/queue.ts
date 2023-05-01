@@ -20,15 +20,20 @@ const queueSchema:Schema = new Schema({
         },
     },
     place: {
-      type: String,
+      type: Number,
     },
     reserved: {
-        type: String,
+        type: Boolean,
     },
     localId: {
         type: String,
+    },
+    reserveEnd: {
+      type: Date,
+    },
+    timeEnd: {
+      type: Date,
     }
-    
   }],
 });
   

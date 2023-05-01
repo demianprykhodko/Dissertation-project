@@ -1,14 +1,14 @@
 import { } from 'googlemaps';
-import { Component, ElementRef, Inject, Input, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
-import { EV_charger, Connector } from 'src/app/shared/models/ev_charger';
+import { EV_charger, Connector } from 'src/app/assets/models/ev_charger';
 import { ChargersService } from 'src/app/services/chargers.service';
 import { DecodePolylineService } from 'src/app/services/decodePolyline.service';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { CarModel } from 'src/app/shared/models/carModel';
+import { Observable, concatMap, map, tap } from 'rxjs';
+import { CarModel } from 'src/app/assets/models/carModel';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
-import { queue, place } from 'src/app/shared/models/queue';
+import { queue, place } from 'src/app/assets/models/queue';
 
 
 @Component({
@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit {
   fromLocation: string;
   timeToStay: number = 1800;
   toLocation: string;
-  options: any = { types: ["(cities)"] };
+  options: any = { types: ["(cities)"], componentRestrictions: { country: "uk" }, };
   zone: NgZone;
   directionsDisplay: any;
   directionsService: any;
@@ -52,16 +52,18 @@ export class HomeComponent implements OnInit {
   queue: queue[] = [];
   ourQueue: queue;
   ourEntity: place;
-  timeLeft: number = 120;
+  timeLeft: number = 60;
   time: number;
   mennekes: number =0;
   ccs: number=0;
   jevs: number = 0;
   done: number = 0;
   link: string;
-  showError: number;
+  showError: boolean;
   hours: number;
   minutes: number;
+  Interval: any;
+  getAllAlg: boolean = false;
 
   constructor(private chargerService: ChargersService, private activatedRoute: ActivatedRoute, private decodePolylineService: DecodePolylineService, zone: NgZone) {
     this.zone = zone;
@@ -80,6 +82,11 @@ export class HomeComponent implements OnInit {
     queuesObservable.subscribe((serverQueues) => {
       this.queue = serverQueues;
     })
+    let testObservable: Observable<any>;
+    testObservable = this.chargerService.getAllChargerCoords();
+    testObservable.subscribe((coords) => {
+      console.log(coords)
+    })
   }
 
 
@@ -90,8 +97,10 @@ export class HomeComponent implements OnInit {
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapProperties);
+
     this.directionsDisplay = new google.maps.DirectionsRenderer();
     this.directionsService = new google.maps.DirectionsService();
+
     this.markerCluster = new MarkerClusterer({
       map: this.map,
       markers: []
@@ -108,6 +117,7 @@ export class HomeComponent implements OnInit {
     this.locationSection = true;
     this.routeSection = false;
     this.done = 0;
+    this.getAllAlg = false;
   }
 
   showRouteSection() {
@@ -117,6 +127,7 @@ export class HomeComponent implements OnInit {
     this.queueSection = false;
     this.markerCluster.setMap(null);
     this.done = 0;
+    this.getAllAlg = false;
     let input1 = document.getElementById('input1');
     let autocomplete1 = new google.maps.places.Autocomplete(input1 as HTMLInputElement, this.options)
     google.maps.event.addListener(autocomplete1, 'place_changed', () => {
@@ -142,11 +153,12 @@ export class HomeComponent implements OnInit {
   }
 
   getLocation() {
+    this.clearOverlays();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const pos = {
           lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          lng: position.coords.longitude
         };
         this.map.setCenter(pos);
         this.map.setZoom(12);
@@ -187,14 +199,18 @@ export class HomeComponent implements OnInit {
                 this.ourQueue = null;
                 this.queueSection = true
                 this.chargerChosen = this.chargers[index];
+                console.log(this.chargers[index])
 
                 this.calculateChargerTypes();
 
+                console.log(this.queue)
                 for (let index = 0; index < this.queue.length; index++) {
                   const element = this.queue[index];
                   if (element.id === this.chargerChosen.ChargeDeviceId) {
                     this.ourQueue = this.queue[index];
                   }
+                  console.log(this.ourQueue)
+                  console.log(this.ourQueue.entity[0].reserved)
                 }
               });
           }
@@ -206,14 +222,16 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  reloadPage() {
+    window.location.reload();
+  }
+
   calculateChargerTypes() {
     this.mennekes = 0;
     this.ccs = 0;
     this.jevs = 0;
     for (let index = 0; index < this.chargerChosen.Connector.length; index++) {
       const element = this.chargerChosen.Connector[index];
-      console.log(typeof (element.ConnectorType))
-      console.log(element.ConnectorType.includes('Mennekes'))
       if (element.ConnectorType.includes('Mennekes')) {
         this.mennekes+=1;
       }
@@ -223,7 +241,6 @@ export class HomeComponent implements OnInit {
       else {
         this.jevs+=1;
       }
-
     }
   }
 
@@ -231,7 +248,7 @@ export class HomeComponent implements OnInit {
     d = Number(d);
     this.hours = Math.floor(d / 3600);
     this.minutes = Math.floor(d % 3600 / 60);
-}
+  }
 
   clearOverlays() {
     for (var i = 0; i < this.markers.length; i++ ) {
@@ -240,12 +257,31 @@ export class HomeComponent implements OnInit {
     for (var i = 0; i < this.circles.length; i++ ) {
       this.circles[i].setMap(null);
     }
+    this.markerCluster.clearMarkers();
     this.markers.length = 0;
     this.circles.length = 0;
   }
 
+  convertTZ(date, tzString) {
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
+  }
+
+  addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+  }
+
+  deleteAllQueues() {
+    this.chargerService.deleteAllQueue().subscribe((res) => {
+      console.log(res);
+      location.reload();
+    });
+  }
+
   async addToQueue() {
     this.secondsToHms(this.timeToStay)
+    console.log(Date.now())
+    const reservationEnd = this.addMinutes(new Date(), this.timeLeft / 60)
+    console.log(reservationEnd)
     if (!this.ourQueue) {
       this.ourEntity = {
         car: this.selectedCar[0].Name,
@@ -255,7 +291,7 @@ export class HomeComponent implements OnInit {
         },
         place: 1,
         reserved: true,
-        localId: 1
+        reserveEnd: reservationEnd,
       }
 
       this.ourQueue = {
@@ -270,49 +306,216 @@ export class HomeComponent implements OnInit {
       })
       this.startReservation();
     }
-  }
-
-  deleteQueue() {
-    this.showError = 1;
-    if (this.ourQueue.entity.length == 1) {
-      this.chargerService.deleteQueue(this.ourQueue.id)
-      .subscribe(data => {
-        console.log(data)
-      })
+    else{
+      this.ourEntity = {
+        car: this.selectedCar[0].Name,
+        time: {
+          hours: this.hours,
+          minutes: this.minutes,
+        },
+        place: this.ourQueue.entity[this.ourQueue.entity.length - 1].place + 1,
+        reserved: false,
+        reserveEnd: reservationEnd,
+      }
+      const deleteQueue$ = this.chargerService.deleteQueue(this.ourQueue.id);
+      const postQueue$ = deleteQueue$.pipe(
+        tap(() => {
+          this.ourQueue.entity.push(this.ourEntity);
+        }),
+        concatMap(() => {
+          console.log(this.ourQueue)
+          return this.chargerService.postQueue(this.ourQueue);
+        })
+      );
+      postQueue$.subscribe({
+        next: (data) => {
+          console.log(typeof(data[0].entity[0].reserved))
+          if(data[0].entity[0].reserved == true) {
+            console.log('entered')
+            this.waitForReservation();
+          }
+        },
+        error: (error) => {
+          console.error(error);
+          // Handle the error here
+        }
+      });
     }
   }
 
+  waitForReservation() {
+
+    const now = new Date().getTime()
+    const waitUntil = this.convertTZ(this.ourQueue.entity[0].reserveEnd, 'Europe/Paris');
+    waitUntil.setSeconds(waitUntil.getSeconds() + 10);
+    console.log(waitUntil)
+    console.log(typeof(waitUntil))
+
+    const timeToWait = waitUntil.getTime() - now;
+    console.log('waiting for: ' + timeToWait / 1000 + 'seconds')
+    setTimeout(() => {
+      console.log('waiting done')
+      const getQueue$ = this.chargerService.getOneQueue(this.ourQueue.id).pipe(
+        tap((data) => {
+          this.ourQueue = data[0];
+          if(this.ourQueue.entity[0].reserved == true && this.ourEntity.place == 2){
+            this.ourEntity = this.ourQueue.entity[0];
+            this.startReservation();
+          }
+          else{
+            this.waitForCharging();
+          }
+
+        })
+      );
+
+      getQueue$.subscribe({
+        next: (data) => {
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      });
+    }, timeToWait);
+  }
+
+  waitForCharging() {
+
+  }
+
+  deleteQueue() {
+    this.chargerService.deleteQueue(this.ourQueue.id)
+    .subscribe(data => {
+      this.ourEntity = null;
+      this.ourQueue = null;
+      console.log(data)
+    })
+  }
+
+  deleteTop() {
+    const getQueue$ = this.chargerService.getOneQueue(this.ourQueue.id).pipe(
+      tap((data) => {
+        console.log(data[0])
+        this.ourQueue = data[0];
+      })
+    );
+
+    const deleteQueue$ = getQueue$.pipe(
+      concatMap((ourQueue) => {
+        console.log('deleting')
+        return this.chargerService.deleteQueue(this.ourQueue.id);
+      })
+    );
+
+    const pushEntity$ = deleteQueue$.pipe(
+      tap(() => {
+        console.log('in tap operator');
+        this.ourQueue.entity.shift();
+        this.ourQueue.entity[0].reserved = true;
+        for (let i = 0; i < this.ourQueue.entity.length; i++) {
+          this.ourQueue.entity[i].place = this.ourQueue.entity[i].place - 1;
+        }
+      }),
+      concatMap(() => {
+        return this.chargerService.postQueue(this.ourQueue);
+      })
+    );
+
+    pushEntity$.subscribe({
+      next: (data) => {
+        console.log(data);
+        this.ourEntity = null;
+        this.ourQueue = null;
+      },
+      error: (error) => {
+        console.error(error);
+        // Handle the error here
+      }
+    });
+  }
+
   startReservation() {
-    var reserveInterval = setInterval(() => {
+    this.Interval = setInterval(() => {
       if(this.timeLeft > 0) {
         this.timeLeft--;
       } else {
-        clearInterval(reserveInterval)
-        this.deleteQueue()
-        //clear array
+        clearInterval(this.Interval)
+        this.timeLeft = 60;
+        this.chargerService.getOneQueue(this.ourQueue.id)
+          .subscribe(data => {
+            if(data[0].entity[0].reserved == true && data[0].entity.length == 1) {
+              this.deleteQueue()
+            }
+            else {
+              console.log('delte top')
+              this.deleteTop();
+            }
+            this.showError = true;
+        })
       }
     },1000)
   }
 
   startCharging() {
+    clearInterval(this.Interval)
+    this.timeLeft = 60;
     this.ourEntity.reserved = false;
-    this.ourQueue.entity[0] = this.ourEntity;
+    this.ourEntity.reserveEnd = null;
     this.time = this.ourEntity.time.hours * 3600 + this.ourEntity.time.minutes * 60
-    var chargeInterval = setInterval(() => {
+    console.log(this.time)
+    console.log(this.addMinutes(new Date(), this.time / 60))
+    this.ourEntity.timeEnd = this.addMinutes(new Date(), this.time / 60);
+    const getQueue$ = this.chargerService.getOneQueue(this.ourQueue.id).pipe(
+      tap((data) => {
+        this.ourQueue = data[0];
+        this.ourQueue.entity[0] = this.ourEntity;
+      })
+    );
+    const deleteQueue$ = getQueue$.pipe(
+      concatMap((ourQueue) => {
+        return this.chargerService.deleteQueue(this.ourQueue.id);
+      })
+    );
+
+    const postEntity$ = deleteQueue$.pipe(
+      concatMap(() => {
+        return this.chargerService.postQueue(this.ourQueue);
+      })
+    );
+
+    postEntity$.subscribe({
+      next: (data) => {
+        console.log(data);
+      },
+      error: (error) => {
+        console.error(error);
+        // Handle the error here
+      }
+    });
+    console.log(this.ourQueue)
+    this.Interval = setInterval(() => {
       if(this.time > 0) {
         this.time--;
       } else {
-        clearInterval(chargeInterval)
-        //ended charging msg
-        //clear array
+        clearInterval(this.Interval)
+        console.log('ended time of charging')
+        this.showError = true;
       }
     },1000)
   }
 
   leaveCharger() {
-    this.ourEntity = null;
-    this.ourQueue = null;
-    this.queueSection = false;
+    clearInterval(this.Interval)
+    this.chargerService.getOneQueue(this.ourQueue.id)
+          .subscribe(data => {
+            if(data[0].entity.length == 1) {
+              this.deleteQueue()
+            }
+            else {
+              console.log('delte top')
+              this.deleteTop();
+            }
+        })
   }
 
   constructLink() {
@@ -327,10 +530,13 @@ export class HomeComponent implements OnInit {
   }
 
   async getAllOnRoute() {
-    var directionsDisplay = new google.maps.DirectionsRenderer();
-    var directionsService = new google.maps.DirectionsService();
+    this.infoSection = false;
+    this.calculatedChargers = [];
+    this.directionsDisplay.setMap(null)
+    this.clearOverlays()
 
-    directionsDisplay.setMap(this.map);
+
+    this.directionsDisplay.setMap(this.map);
     var request = {
       origin: this.fromLocation,
       destination: this.toLocation,
@@ -338,7 +544,7 @@ export class HomeComponent implements OnInit {
       unitSystem: google.maps.UnitSystem.METRIC,
       provideRouteAlternatives: true,
     };
-    directionsService.route(request, (result, status) => {
+    this.directionsService.route(request, (result, status) => {
       if (status == google.maps.DirectionsStatus.OK) {
         console.log(result);
 
@@ -356,23 +562,43 @@ export class HomeComponent implements OnInit {
             fillColor: "#FF0000",
             fillOpacity: 0,
             map: this.map,
-            radius: 1000,
+            radius: 10000,
           });
           for (let index = 0; index < this.chargers.length; index++) {
             const lat = parseFloat(this.chargers[index].ChargeDeviceLatitude);
             const lng = parseFloat(this.chargers[index].ChargeDeviceLongitude);
             const point = new google.maps.LatLng(lat, lng);
             if (google.maps.geometry.spherical.computeDistanceBetween(point, circle.getCenter()) <= circle.getRadius()) {
-              new google.maps.Marker({
+              var marker = new google.maps.Marker({
                 position: point,
                 map: this.map,
               });
+              this.markers.push(marker);
+              var listener = marker.addListener(
+                "click",
+                () => {
+                  this.infoSection = true;
+                  this.getAllAlg = true;
+                  this.chargerChosen = this.chargers[index];
+                  this.calculateChargerTypes()
+                });
+              this.listeners.push(listener);
             }
           }
         }
-        directionsDisplay.setDirections(result);
+        this.directionsDisplay.setDirections(result);
       }
     });
+  }
+
+  addToPath() {
+    this.calculatedChargers.push(this.chargerChosen)
+    this.done = 1;
+    this.constructLink();
+  }
+
+  clearPath() {
+    this.calculatedChargers = [];
   }
 
   getOptimalRouteCustom() {
@@ -411,13 +637,14 @@ export class HomeComponent implements OnInit {
       parseFloat(this.chargerChosen.ChargeDeviceLongitude)
     )
     var request = {
-      origin: coords,
-      destination: this.toLocation,
+      origin: coords, // Latitude and Longitude pair
+      destination: this.toLocation, // Latitude and Longitude pair
       travelMode: google.maps.TravelMode.DRIVING,
       unitSystem: google.maps.UnitSystem.METRIC,
       provideRouteAlternatives: true,
     };
     let range = (this.selectedCar[0].Range - (this.chargeAtStop / 100)) * 1000;
+    range = Math.floor(range - range * (this.chargeAtStop / 100));
     this.chargerChosen = {} as EV_charger;
     this.calculateRouteCustom(request, range);
   }
@@ -447,7 +674,6 @@ export class HomeComponent implements OnInit {
             this.getOptimalCustomChargers(result, i, j);
             path_done = path_done - range;
             break;
-
           }
         }
         if (this.test == 1) {
@@ -513,9 +739,9 @@ export class HomeComponent implements OnInit {
   }
 
   calculateOptimal() {
-    let eqs_real = this.selectedCar[0].Range * (this.chargeAtStart / 100) * 1000;
-    eqs_real = Math.floor(eqs_real - eqs_real * (this.chargeAtStop / 100));
-    console.log(eqs_real)
+    let range = this.selectedCar[0].Range * (this.chargeAtStart / 100) * 1000;
+    range = Math.floor(range - range * (this.chargeAtStop / 100));
+    console.log(range)
     var request = {
       origin: this.fromLocation,
       destination: this.toLocation,
@@ -525,40 +751,40 @@ export class HomeComponent implements OnInit {
     };
     this.directionsService.route(request, (result, status) => {
       if (status == google.maps.DirectionsStatus.OK) {
-        console.log(result)
 
         let path_done = 0;
         let pathWhereChargerNeeded = 0;
 
         for (let i = 0; i < result.routes[0].legs[0].steps.length; i++) {
-          console.log(eqs_real)
           let previous_path = path_done;
           path_done = path_done + result.routes[0].legs[0].steps[i].distance.value
           let j = 0; // index of the remaining path to the max range of the vehicle
 
-          if (path_done > eqs_real) {
+          if (path_done > range) {
             if (result.routes[0].legs[0].steps[i].distance.value < previous_path) {
-              pathWhereChargerNeeded = (eqs_real - previous_path) / result.routes[0].legs[0].steps[i].distance.value;
+              pathWhereChargerNeeded = (range - previous_path) / result.routes[0].legs[0].steps[i].distance.value;
               j = Math.floor(pathWhereChargerNeeded * result.routes[0].legs[0].steps[i].path.length);
               this.getOptimalChargers(result, i, j);
-              path_done = path_done - eqs_real + 5000;
+              path_done = path_done - range + 5000;
               console.log(path_done)
-              eqs_real = Math.floor((this.selectedCar[0].Range - (this.chargeAtStop/100)) * 1000)
+              range = Math.floor((this.selectedCar[0].Range - (this.chargeAtStop/100)) * 1000)
+              range = Math.floor(range - range * (this.chargeAtStop / 100));
             }
             else {
-              pathWhereChargerNeeded = (eqs_real - previous_path) / result.routes[0].legs[0].steps[i].distance.value;
+              pathWhereChargerNeeded = (range - previous_path) / result.routes[0].legs[0].steps[i].distance.value;
               j = Math.floor(pathWhereChargerNeeded * result.routes[0].legs[0].steps[i].path.length);
               this.getOptimalChargers(result, i, j);
-              path_done = path_done - eqs_real + 5000;
+              path_done = path_done - range + 5000;
               console.log(path_done)
-              eqs_real = Math.floor((this.selectedCar[0].Range - (this.chargeAtStop/100)) * 1000)
-              if (path_done > eqs_real) {
-                pathWhereChargerNeeded = eqs_real / path_done;
+              range = Math.floor((this.selectedCar[0].Range - (this.chargeAtStop/100)) * 1000)
+              range = Math.floor(range - range * (this.chargeAtStop / 100));
+              if (path_done > range) {
+                pathWhereChargerNeeded = range / path_done;
                 j = Math.floor(pathWhereChargerNeeded * result.routes[0].legs[0].steps[i].path.length);
                 this.getOptimalChargers(result, i, j);
-                path_done = path_done - eqs_real;
-                console.log(path_done)
-                eqs_real = Math.floor((this.selectedCar[0].Range - (this.chargeAtStop/100)) * 1000)
+                path_done = path_done - range;
+                range = Math.floor((this.selectedCar[0].Range - (this.chargeAtStop/100)) * 1000)
+                range = Math.floor(range - range * (this.chargeAtStop / 100));
               }
             }
           }

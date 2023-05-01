@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { EV_charger } from '../shared/models/ev_charger';
+import { EV_charger } from '../assets/models/ev_charger';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { allChargers, allQueue, cars, oneQueue, postQueue } from '../shared/constants/urls';
-import { CarModel } from '../shared/models/carModel';
-import { queue } from '../shared/models/queue';
+import { allChargers, allQueue, cars, oneQueue, postQueue, deleteQueue, deleteAllQueue, allChargersCoords } from '../assets/constants/urls';
+import { CarModel } from '../assets/models/carModel';
+import { queue } from '../assets/models/queue';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,10 @@ export class ChargersService {
 
   getAll(): Observable<EV_charger[]> {
     return this.http.get<EV_charger[]>(allChargers);
+  }
+
+  getAllChargerCoords() : Observable<any> {
+    return this.http.get<any>(allChargersCoords)
   }
 
   getAllCars(): Observable<CarModel[]> {
@@ -34,6 +38,10 @@ export class ChargersService {
   }
 
   deleteQueue(id): Observable<any> {
-    return this.http.delete(this.deleteQueue + id);
+    return this.http.delete(deleteQueue + id);
+  }
+
+  deleteAllQueue(): Observable<any> {
+    return this.http.delete(deleteAllQueue);
   }
 }

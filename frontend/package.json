@@ -20,8 +20,13 @@
     "@angular/router": "^15.1.0",
     "@fullcalendar/google-calendar": "^6.1.4",
     "@googlemaps/markerclusterer": "^2.0.15",
+    "mongodb": "^5.2.0",
+    "net": "^1.0.2",
     "normalize.css": "^8.0.1",
+    "path": "^0.12.7",
     "rxjs": "~7.8.0",
+    "stream": "^0.0.2",
+    "stream-browserify": "^3.0.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"
   },

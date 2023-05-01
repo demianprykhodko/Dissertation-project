@@ -22,11 +22,14 @@ const router = express.Router();
 app.use('/api/v1', router);
 
 router.get('/data', User.getAllChargers);
+router.get('/data/coords', User.getAllChargersCoordinates);
 router.get('/cars', User.getAllCars);
 router.get('/queue', User.getAllQueue);
 router.get('/queue/:queueId', User.getOneQueue);
 router.post('/queue', User.postQueue);
 router.delete('/queue/:queueId', User.deleteQueue);
+router.delete('/queue', User.deleteAllQueue);
+router.put('/queue/:queueId', User.updateQueue);
 
 const port = process.env.PORT;
 

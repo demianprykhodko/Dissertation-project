@@ -1,8 +1,4 @@
 import { Injectable } from '@angular/core';
-import { EV_charger } from '../shared/models/ev_charger';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { allChargers } from '../shared/constants/urls';
 
 @Injectable({
   providedIn: 'root'

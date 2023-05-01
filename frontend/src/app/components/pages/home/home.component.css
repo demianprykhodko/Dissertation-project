@@ -1,23 +1,51 @@
-
-body{
-  width: 100%;
+h1 {
+  color: #111;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bold;
+  letter-spacing: -1px;
+  line-height: 1;
+  text-align: center;
 }
 
-.showError{
-  width: 250px;
-  position: relative;
-  left: 42%;
-  background: orangered;
-  border-radius: 10px;
+.container{
+  /* zoom: 0.9; */
+}
+
+.blur {
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.error-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  padding: 10px;
-  margin-bottom: 15px;
-  color: white;
-  font-weight: 800;
+  font-size: 2rem;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  backdrop-filter: none;
+}
+
+.error-message p {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: #ff4d4d;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+.map-section{
+  display: flex;
+  float: left;
+  width: 50%;
 }
 
 #map{
-  width: 720px;
+  width: 100%;
   height: 700px;
 }
 .location-section{
@@ -64,6 +92,7 @@ body{
   display: inline-block;
 }
 .option-section{
+  padding-top: 20px;
   display: flex;
   justify-content: center;
   margin: 0 auto;
@@ -90,14 +119,6 @@ body{
   margin-top: 30px;
   margin-bottom: 30px;
   font-size: 15px;
-}
-h1 {
-  color: #111;
-  font-family: "Lucida Console", Monaco, monospace;
-  font-weight: bold;
-  letter-spacing: -1px;
-  line-height: 1;
-  text-align: center;
 }
 
 .input{
@@ -246,6 +267,7 @@ h1 {
 .left-info{
   display: flex;
   flex-direction: column;
+  float: left;
   padding: 0 10px 0 10px;
   width: 25%;
 }
@@ -345,12 +367,12 @@ h1 {
 
 .queue-empty-list{
   text-align: center;
-  margin-top: 100px;
+  margin-top: 60px;
 }
 
 .queue-entity{
   height: 100px;
-  background: lightgray;
+  border: 2px solid #D80286;
   margin-top: 15px;
   border-radius: 10px;
   text-align: center;
@@ -358,6 +380,10 @@ h1 {
 }
 
 .queue-section{
+  display: flex;
+  float: left;
+  flex-direction: column;
+  width: 25%;
   padding: 10px;
   margin: 0 5px;
   border: 2px solid #D80286;
@@ -368,6 +394,15 @@ h1 {
 
 .queue-item{
   margin-top: 10px;
+}
+
+.queue-button{
+  margin-top: 70px;
+}
+
+.charger-name{
+  display: flex;
+  justify-content: center;
 }
 
 .list-start{
@@ -397,34 +432,17 @@ h1 {
 
 .next-button{
   margin-top: 30px;
-  background: transparent;
-  border: 1px solid #e74c3c;
-  display: inline-block;
-  margin-left: 70px;
-  border-radius: 10px;
-  width: 100px;
   text-align: center;
 }
 
-.next-button button{
-  background: none;
-	color: inherit;
-	border: none;
-	padding: 0;
-	font: inherit;
-	cursor: pointer;
-	outline: inherit;
-}
-
 .google-button{
-  margin-top: 50px;
-  margin-left: 75px;
+  margin-top: 30px;
+  text-align: center;
 }
 
-.google-button a{
+.google-button button a{
   text-decoration: none;
-  color: darkred;
-  font-size: 25px;
+  color: black;
 }
 
 .leave-button{
@@ -449,9 +467,11 @@ h1 {
 }
 
 .right-info{
-  padding: 22px;
-  border: 2px solid red;
-  flex-grow: 100;
+  display: flex;
+  float: left;
+  flex-direction: column;
+  width: 25%;
+  border: 2px solid #D80286;
   margin: 5px;
 }
 

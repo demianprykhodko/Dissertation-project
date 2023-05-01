@@ -9,6 +9,13 @@ class User {
         res.json(chargers);
     };
 
+    public async getAllChargersCoordinates(req: any, res: any) {
+        const chargers = await Chargers.aggregate([
+            { $project : { _id : 0, ChargeDeviceId: 1, coordinates : [ "$ChargeDeviceLatitude", "$ChargeDeviceLongitude"] } }
+        ]);
+        res.json(chargers);
+    };
+
     public async getAllCars(req: any, res: any) {
         const cars = await Cars.find({});
         res.json(cars);
@@ -39,6 +46,17 @@ class User {
         const queue = await Queue.deleteOne({
             id: queueId
         });
+        res.json(queue);
+    };
+
+    public async deleteAllQueue(req: any, res: any) {
+        const queue = await Queue.deleteMany({});
+        res.json(queue);
+    };
+
+    public async updateQueue(req: any, res: any) {
+        var body = req.body;
+        const queue = await Queue.findOneAndReplace(req.params.queueId,body);
         res.json(queue);
     };
     
