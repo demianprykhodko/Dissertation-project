@@ -8,6 +8,7 @@ export class ModalService {
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver, private injector: Injector) { }
 
+  // This function opens the modal window
   openModal() {
     const modalFactory = this.componentFactoryResolver.resolveComponentFactory(ModalComponent);
     const componentRef = modalFactory.create(this.injector);

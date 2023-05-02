@@ -4,10 +4,10 @@
 <div class="container" [class.blur] = "showError">
   <div class="option-section">
     <div class="location-feature">
-      <button class="button_slide slide_down button1" (click)="showLocationSection()">Location Finder</button>
+      <button class="button_slide slide_down button1" (click)="showLocationSection()">Queuing System</button>
     </div>
     <div class="route-feature">
-      <button class="button_slide slide_down button2" (click)="showRouteSection()">Route Finder</button>
+      <button class="button_slide slide_down button2" (click)="showRouteSection()">Routing Algorithms</button>
     </div>
   </div>
   <div *ngIf="locationSection" class="location-section">
@@ -31,7 +31,7 @@
     </div>
     <div class="location-range">
       <span>Time for charge</span>
-      <input class="range" type="range" min="30" max="120" step="30" [(ngModel)]="timeToStay" style="padding: 0;">
+      <input class="range" type="range" min="30" max="120" step="30" [(ngModel)]="timeToStay" style="padding: 0;"> 
       <label>{{timeToStay}} in seconds</label>
     </div>
     <div class="location-button">
@@ -220,11 +220,6 @@
                   Charged up
                 </button>
               </div>
-              <!-- <div *ngIf="ourQueue" class="queue-button">
-                <button class="button_slide slide_down" (click)="addToQueue()">
-                  Reserve a slot
-                </button>
-              </div> -->
             </div>
           </div>
           <div *ngIf="!ourQueue || !ourEntity" class="queue-empty-list">
@@ -241,8 +236,3 @@
   <p>You have spent too much time on the charger. You will be charged for overuse</p>
   <button class="button_slide slide_down" (click)="reloadPage()">Reload</button>
 </div>
-<!-- home.component.html -->
-<!-- <body [class.blur]="showError"> -->
-  <!-- your app content goes here -->
-
-  <!-- error message and reload button -->

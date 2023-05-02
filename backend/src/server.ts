@@ -1,39 +1,40 @@
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
+import dbContext from './controllers/main'
 import * as bodyParser from 'body-parser';
-require('dotenv').config({ path: '../.env' });
-import User from './controllers/main'
 import { connectToDatabase } from './db/connect';
-const app = express()
+require('dotenv').config({ path: '../.env' });
 
-app.use(bodyParser.json());
+const app = express() // Create an instance of the express class
 
+app.use(bodyParser.json()); // Use the body-parser middleware
+
+// Allow the frontend to connect to the backend
 app.use(cors({
-    credentials: true,
+    credentials: true, 
     origin: ['http://localhost:4200']
 }))
 
+// Create a router for the API
 const router = express.Router();
-
-// app.use('', (req, res) => {
-//     res.send('APi working')
-// })
 
 app.use('/api/v1', router);
 
-router.get('/data', User.getAllChargers);
-router.get('/data/coords', User.getAllChargersCoordinates);
-router.get('/cars', User.getAllCars);
-router.get('/queue', User.getAllQueue);
-router.get('/queue/:queueId', User.getOneQueue);
-router.post('/queue', User.postQueue);
-router.delete('/queue/:queueId', User.deleteQueue);
-router.delete('/queue', User.deleteAllQueue);
-router.put('/queue/:queueId', User.updateQueue);
+// Create the routes for the API
+router.get('/data', dbContext.getAllChargers);
+router.get('/data/coords', dbContext.getAllChargersCoordinates);
+router.get('/cars', dbContext.getAllCars);
+router.get('/queue', dbContext.getAllQueue);
+router.get('/queue/:queueId', dbContext.getOneQueue);
+router.post('/queue', dbContext.postQueue);
+router.delete('/queue/:queueId', dbContext.deleteQueue);
+router.delete('/queue', dbContext.deleteAllQueue);
+router.put('/queue/:queueId', dbContext.updateQueue);
 
 const port = process.env.PORT;
 
+// Start the server on specific port and with a connection to the database
 app.listen(port, () => {
     connectToDatabase(process.env.MONGO_URI);
-    console.log(`Server running on ${port}`);
+    console.log(`Server running on port ${port}`);
 })
